@@ -25,7 +25,7 @@ SECRET_KEY = '%gbm-*z0uudfel=txcl194)1zzm3nie*(1mz24&8wbbh(m4tyf'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['cergen-test-2.herokuapp.com']
+ALLOWED_HOSTS = ['cergen-test-2.herokuapp.com', '127.0.0.1']
 
 
 # Application definition
@@ -122,7 +122,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'statics'),
+    os.path.join(BASE_DIR, 'static'),
 ]
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

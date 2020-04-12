@@ -47,7 +47,7 @@ def create_certi(request):
     response = HttpResponse(content_type='application/force-download')
     response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(file_name)
     response['X-Sendfile'] = smart_str(path_to_file)
-    os.remove(path_to_file+file_name)
+    #os.remove(path_to_file+file_name)
     return response
 
     #html = "Success!"
