@@ -25,7 +25,7 @@ SECRET_KEY = '%gbm-*z0uudfel=txcl194)1zzm3nie*(1mz24&8wbbh(m4tyf'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['cergen-test-2.herokuapp.com']
 
 
 # Application definition
