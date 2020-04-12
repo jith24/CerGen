@@ -1,0 +1,1 @@
+web: gunicorn cergen.wsgi --log-file -
