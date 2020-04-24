@@ -11,7 +11,6 @@ from PIL import ImageDraw
 from django.http import HttpResponse
 import os, xlrd, mimetypes, logging
 from zipfile import ZipFile
-from pdf2image import convert_from_path
 
 logger = logging.getLogger(__name__)
 
