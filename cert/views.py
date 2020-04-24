@@ -3,13 +3,23 @@ from django.urls import reverse_lazy
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Post
 from .forms import PostForm
+from django.http import FileResponse
 from django.utils.encoding import smart_str
 from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw
 from django.http import HttpResponse
-import os, xlrd
+import os, xlrd, mimetypes, logging
 from zipfile import ZipFile
+from pdf2image import convert_from_path
+
+logger = logging.getLogger(__name__)
+
+
+def DeleteFile(request):
+    file_name = request.POST.get('file_url')
+    os.remove(file_name[1:])
+    return HttpResponse(file_name)
 
 def CreatePostView(request): # new
     if request.method == "POST":
@@ -26,50 +36,37 @@ def create_certi(request):
     temp_path=request.POST.get('url')
     img = Image.open(temp_path[1:])
     draw = ImageDraw.Draw(img)
-    #selecting the required font and text size
     path="static/fonts/DejaVuSans-Oblique.ttf"
     h = int(request.POST.get('h'))
     selectFont = ImageFont.truetype(path, size = h)
     name = request.POST.get('name')
     W, H = draw.textsize(name, selectFont)
     x1 = int(request.POST.get('x1'))
-    #x2 = request.POST.get('x2')
     y1 = int(request.POST.get('y1'))
-    #y2 = request.POST.get('y2')
     w = int(request.POST.get('w'))
     draw.text((x1+(w-W)/2,y1+(h-H)/2), name, (0,0,0), font=selectFont)
-
-    img.save( 'certificate\\'+name+'.pdf', "PDF", resolution=100.0)
+    img.save( 'media/certificate/'+name+'.pdf', "PDF", resolution=100.0)
     os.remove(temp_path[1:])
-
     file_name = name+'.pdf'
     path_to_file = 'certificate\\'
-    response = HttpResponse(content_type='application/force-download')
-    response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(file_name)
-    response['X-Sendfile'] = smart_str(path_to_file)
-    #os.remove(path_to_file+file_name)
-    return response
+    response = path_to_file+file_name
+    return HttpResponse('/media/certificate/'+file_name)
 
-    #html = "Success!"
-    #return HttpResponse(html)
 
 def create_certi_indi(name,x1,y1,h,w,temp_path,zipname):
     img = Image.open(temp_path[1:])
     draw = ImageDraw.Draw(img)
     path="static/fonts/DejaVuSans-Oblique.ttf"
-    selectFont = ImageFont.truetype(path, size = int(h))
+    selectFont = ImageFont.truetype(path, size = h)
     W, H = draw.textsize(name, selectFont)
     draw.text((x1+(w-W)/2,y1+(h-H)/2),name, (0,0,0), font=selectFont)
-    zipObj = ZipFile('certificate\\'+zipname+'.zip', 'a')
-    img.save('certificate\\'+name+'.pdf', "PDF", resolution=100.0)
-    zipObj.write('certificate/'+name+'.pdf')
-    os.remove('certificate\\'+name+'.pdf')
+    zipObj = ZipFile('media/certificate/'+zipname+'.zip', 'a')
+    img.save('media/certificate/'+name+'.pdf', "PDF", resolution=100.0)
+    zipObj.write('media/certificate/'+name+'.pdf')
+    os.remove('media/certificate/'+name+'.pdf')
     zipObj.close()
-
-
-    
-    html = "Success!"
-    return HttpResponse(html)
+    #html = "Success!"
+    return zipname
 
 def create_certi_multiple(request):
     temp_path=request.POST.get('url')
@@ -94,3 +91,5 @@ def create_certi_multiple(request):
         
         # Make certificate and check if it was successful
         filename = create_certi_indi(name,int(x1),int(y1),int(h),int(w),temp_path,zipname)
+    
+    return HttpResponse('/media/certificate/'+filename+'.zip')

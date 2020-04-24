@@ -15,47 +15,13 @@
 
   </head>
 <body>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-                <a class="navbar-brand" href="#">CerGen</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                  <span class="navbar-toggler-icon"></span>
-                </button>
-              
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                  <ul class="navbar-nav mr-auto">
-                    <li class="nav-item active">
-                      <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" href="#">Link</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Dropdown
-                      </a>
-                      <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="#">Action</a>
-                        <a class="dropdown-item" href="#">Another action</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Something else here</a>
-                      </div>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
-                    </li>
-                  </ul>
-                  <form class="form-inline my-2 my-lg-0">
-                    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-                  </form>
-                </div>
-              </nav>
     <div class="img"><img class="certi" src="{{ post.cover.url}}" id="target" alt="{{ post.title }}"></div>
     {% if post.sfile %}
     <img id="invi" src="{{post.sfile.url}}">
     {% endif %}
 
 <div><span id="indi">Name of Student</span><span id="multi">Name for final Zip file</span><input type="text" id="name_input"></div>
+<a id="download" download="" href="">download</a>
 
 <button type="button" id="send_values">Submit</button>
 
@@ -90,12 +56,14 @@
 
     $(document).ready(function() {
       var multi=document.getElementById("multi");
-        
+      var down= document.getElementById("download")
         var indi=document.getElementById("indi");
+        down.style.display = "none";
       var file_url=null;
       if("{{ post.sfile }}"){
         var invi=document.getElementById("invi");
         invi.style.display = "none";
+  
         multi.style.display = "inline";
         indi.style.display = "none";
         file_url=invi.getAttribute('src');}
@@ -113,7 +81,6 @@
           $.ajax({
                 url: url,
                 type: "POST",
-                dataType: "json",
                 data: {
                   name:name,
                   url:img.getAttribute('src'),
@@ -126,13 +93,37 @@
                   w:w_final,
                   csrfmiddlewaretoken: '{{ csrf_token }}'
                     },
-                success : function(json) {
-                    alert("Successfully sent the URL to Django");
+                success : function(data, textStatus, xhr) {
+                    name=xhr.responseText
+                    $("a#download").attr({
+                    "download" : name+'.pdf',
+                    "href" : xhr.responseText      
+                    }).get(0).click();
+
+
+                    $.ajax({
+                    url: "/DeleteFile",
+                    type: "POST",
+                    data: {
+                        file_url : name,
+                        type : JSON,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                success : function(jqxhr) {
+                    alert("Success " + jqxhr.responseText);                    
                 },
                 error : function(xhr,errmsg,err) {
                     alert("Could not send URL to Django. Error: " + xhr.status + ": " + xhr.responseText);
-                }
-            });
+                  }
+            })
+
+
+
+                },
+                error : function(xhr,errmsg,err) {
+                    alert("Could not send URL to Django. Error: " + xhr.status + ": " + xhr.responseText);
+                  }
+            })
         });
     });
     
